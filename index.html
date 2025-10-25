@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropic Magic - Order & Track</title>
+    
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <style>
+        /* === KEEP ALL YOUR EXISTING CSS === */
+        :root {
+            --teal: #2DD4BF;
+            --coral: #FF6B6B;
+            --sunny: #FFD166;
+            --leaf: #06D6A0;
+            --deep-blue: #118AB2;
+            --dark: #073B4C;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--teal) 0%, var(--deep-blue) 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 50px;
+            padding: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: var(--coral);
+            color: white;
+        }
+        
+        .menu-category {
+            margin-bottom: 25px;
+        }
+        
+        .category-title {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .item-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+        
+        .item-card.highlight {
+            border-color: var(--sunny);
+            background: linear-gradient(135deg, #FFF9C4, white);
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .item-price {
+            font-weight: bold;
+            color: var(--deep-blue);
+            font-size: 1.1rem;
+        }
+        
+        .badge {
+            background: var(--sunny);
+            color: var(--dark);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .cart {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .clear-cart {
+            color: var(--coral);
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        
+        .clear-cart:hover {
+            text-decoration: underline;
+        }
+        
+        .cart-items {
+            margin-bottom: 15px;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .remove-item {
+            color: var(--coral);
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .remove-item:hover {
+            background: var(--coral);
+            color: white;
+        }
+        
+        .cart-total {
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--dark);
+            margin: 10px 0;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            background: var(--leaf);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .checkout-btn:hover {
+            background: var(--teal);
+            transform: scale(1.02);
+        }
+        
+        .checkout-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .tracking-view {
+            display: none;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .order-id {
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .status-waiting { color: var(--coral); }
+        .status-preparing { color: var(--sunny); }
+        .status-ready { color: var(--leaf); }
+        .status-completed { color: var(--deep-blue); }
+        
+        .order-items {
+            margin: 10px 0;
+        }
+        
+        .order-time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🌴 Tropic Magic</div>
+            <div class="tagline">Fresh • Fast • Tropical</div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <div class="tab active" onclick="showTab('menu')">Menu</div>
+            <div class="tab" onclick="showTab('tracking')">My Order</div>
+        </div>
+        
+        <!-- Menu View -->
+        <div id="menuView" class="menu-view">
+            <!-- Mocktails -->
+            <div class="menu-category">
+                <div class="category-title">🍹 MOCKTAILS</div>
+                <div class="item-card highlight" onclick="addToCart('BTS Mocktail', 60)">
+                    <div class="item-info">
+                        <span class="item-name">BTS Mocktail ☑</span>
+                        <div class="badge">BEST SELLER</div>
+                    </div>
+                    <div class="item-price">60/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Blue Lagoon Mocktail', 40)">
+                    <div class="item-info">
+                        <span class="item-name">Blue Lagoon Mocktail</span>
+                        <div class="badge">POPULAR</div>
+                    </div>
+                    <div class="item-price">40/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Strawberry Mocktail', 40)">
+                    <div class="item-info">
+                        <span class="item-name">Strawberry Mocktail</span>
+                    </div>
+                    <div class="item-price">40/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Watermelon Mocktail', 40)">
+                    <div class="item-info">
+                        <span class="item-name">Watermelon Mocktail</span>
+                    </div>
+                    <div class="item-price">40/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Lemon Mint Mocktail', 40)">
+                    <div class="item-info">
+                        <span class="item-name">Lemon Mint Mocktail</span>
+                    </div>
+                    <div class="item-price">40/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Pineapple Mocktail', 40)">
+                    <div class="item-info">
+                        <span class="item-name">Pineapple Mocktail</span>
+                    </div>
+                    <div class="item-price">40/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Blueberry Mocktail', 40)">
+                    <div class="item-info">
+                        <span class="item-name">Blueberry Mocktail</span>
+                    </div>
+                    <div class="item-price">40/-</div>
+                </div>
+            </div>
+            
+            <!-- Desserts -->
+            <div class="menu-category">
+                <div class="category-title">🍨 DESSERTS</div>
+                <div class="item-card" onclick="addToCart('Brownie Icecream', 50)">
+                    <div class="item-info">
+                        <span class="item-name">Brownie Icecream</span>
+                        <div class="badge">BEST SELLER</div>
+                    </div>
+                    <div class="item-price">50/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Special Brownie', 70)">
+                    <div class="item-info">
+                        <span class="item-name">Special Brownie</span>
+                    </div>
+                    <div class="item-price">70/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Fruit Tart', 60)">
+                    <div class="item-info">
+                        <span class="item-name">Fruit Tart (special)</span>
+                    </div>
+                    <div class="item-price">60/-</div>
+                </div>
+            </div>
+            
+            <!-- Sandwiches -->
+            <div class="menu-category">
+                <div class="category-title">🥪 SANDWICHES</div>
+                <div class="item-card" onclick="addToCart('Veg Sandwich', 30)">
+                    <div class="item-info">
+                        <span class="item-name">Veg Sandwich</span>
+                        <div class="badge">BEST SELLER</div>
+                    </div>
+                    <div class="item-price">30/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Veg Mayo Sandwich', 40)">
+                    <div class="item-info">
+                        <span class="item-name">Veg Mayo Sandwich</span>
+                    </div>
+                    <div class="item-price">40/-</div>
+                </div>
+                <div class="item-card" onclick="addToCart('Crispy Corn Sandwich', 40)">
+                    <div class="item-info">
+                        <span class="item-name">Crispy Corn Sandwich</span>
+                    </div>
+                    <div class="item-price">40/-</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tracking View -->
+        <div id="trackingView" class="tracking-view">
+            <div class="loading" id="trackingLoading">Loading your order status...</div>
+            <div id="orderTracking"></div>
+        </div>
+        
+        <!-- Shopping Cart -->
+        <div class="cart">
+            <div class="cart-header">
+                <span>Your Order</span>
+                <span class="clear-cart" onclick="clearCart()">Clear All</span>
+            </div>
+            <div class="cart-items" id="cartItems">
+                <div class="empty-cart">Your cart is empty</div>
+            </div>
+            <div class="cart-total" id="cartTotal">Total: ₹0</div>
+            <button class="checkout-btn" onclick="placeOrder()" id="checkoutBtn">Place Order & Get Order ID</button>
+        </div>
+    </div>
+
+    <script>
+        // === FIREBASE CONFIGURATION ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4OzqErn78_CqQ_L8R0YPuZAzeug9WTz0",
+            authDomain: "tropic-magic-stall.firebaseapp.com",
+            projectId: "tropic-magic-stall",
+            storageBucket: "tropic-magic-stall.firebasestorage.app",
+            messagingSenderId: "763704245063",
+            appId: "1:763704245063:web:ad7f52a42e44c609b82a62",
+            measurementId: "G-3RPBC3PWVX"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Cart functionality
+        let cart = [];
+        let total = 0;
+        let currentOrderId = null;
+
+        function addToCart(itemName, price) {
+            cart.push({ 
+                id: Date.now() + Math.random(),
+                name: itemName, 
+                price: price 
+            });
+            updateCartDisplay();
+            
+            // Add visual feedback
+            event.currentTarget.style.background = 'var(--leaf)';
+            event.currentTarget.style.color = 'white';
+            setTimeout(() => {
+                event.currentTarget.style.background = '';
+                event.currentTarget.style.color = '';
+            }, 300);
+        }
+
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.id !== itemId);
+            updateCartDisplay();
+        }
+
+        function clearCart() {
+            if (cart.length === 0) return;
+            
+            if (confirm('Clear all items from cart?')) {
+                cart = [];
+                updateCartDisplay();
+            }
+        }
+
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+                cartTotal.textContent = 'Total: ₹0';
+                checkoutBtn.disabled = true;
+                return;
+            }
+            
+            cartItems.innerHTML = '';
+            total = 0;
+            
+            cart.forEach(item => {
+                total += item.price;
+                const itemElement = document.createElement('div');
+                itemElement.className = 'cart-item';
+                itemElement.innerHTML = `
+                    <span>${item.name}</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span>₹${item.price}</span>
+                        <button class="remove-item" onclick="removeFromCart(${item.id})">×</button>
+                    </div>
+                `;
+                cartItems.appendChild(itemElement);
+            });
+            
+            cartTotal.textContent = `Total: ₹${total}`;
+            checkoutBtn.disabled = false;
+        }
+
+        // Tab navigation
+        function showTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show selected view
+            document.getElementById('menuView').style.display = tabName === 'menu' ? 'block' : 'none';
+            document.getElementById('trackingView').style.display = tabName === 'tracking' ? 'block' : 'none';
+            
+            // If switching to tracking, load order status
+            if (tabName === 'tracking' && currentOrderId) {
+                loadOrderStatus();
+            }
+        }
+
+        // Place order with Firebase
+        async function placeOrder() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            
+            const customerName = prompt('Enter your name:');
+            const phone = prompt('Enter your phone number:');
+            
+            if (!customerName || !phone) {
+                alert('Name and phone are required!');
+                return;
+            }
+
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Placing Order...';
+            
+            try {
+                // Generate order ID
+                const orderId = 'ORD' + Date.now().toString().slice(-6);
+                
+                const orderData = {
+                    id: orderId,
+                    customerName: customerName,
+                    phone: phone,
+                    items: cart.map(item => item.name),
+                    total: total,
+                    status: 'waiting',
+                    orderTime: new Date().toLocaleTimeString('en-IN'),
+                    completed: false
+                };
+
+                // Save to Firebase
+                await db.collection('orders').doc(orderId).set(orderData);
+                
+                currentOrderId = orderId;
+
+                // Success message
+                let orderSummary = `✅ ORDER PLACED SUCCESSFULLY!\n\n📋 Order ID: ${orderId}\n👤 Name: ${customerName}\n📞 Phone: ${phone}\n\n🍽️ Items:\n`;
+                cart.forEach(item => {
+                    orderSummary += `• ${item.name} - ₹${item.price}\n`;
+                });
+                orderSummary += `\n💰 Total: ₹${total}\n\n📢 Show this Order ID at the counter to track your order!`;
+                
+                alert(orderSummary);
+
+                // Reset and switch to tracking
+                cart = [];
+                updateCartDisplay();
+                showTab('tracking');
+                
+            } catch (error) {
+                console.error('Order error:', error);
+                alert('Order failed! Please check your connection and try again.');
+            } finally {
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Place Order & Get Order ID';
+            }
+        }
+
+        // Load order status with real-time updates
+        function loadOrderStatus() {
+            if (!currentOrderId) {
+                document.getElementById('orderTracking').innerHTML = `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-id">No Active Order</div>
+                        </div>
+                        <div class="order-items">
+                            <p>You haven't placed any orders yet.</p>
+                            <p>Go to the Menu tab to place your first order!</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('trackingLoading').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('trackingLoading').style.display = 'block';
+            
+            // Real-time listener for order updates
+            db.collection('orders').doc(currentOrderId)
+                .onSnapshot((doc) => {
+                    document.getElementById('trackingLoading').style.display = 'none';
+                    
+                    if (doc.exists) {
+                        const order = doc.data();
+                        const statusClass = `status-${order.status}`;
+                        const statusIcon = getStatusIcon(order.status);
+                        
+                        document.getElementById('orderTracking').innerHTML = `
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div class="order-id">${order.id}</div>
+                                    <div class="${statusClass}">${statusIcon} ${order.status.toUpperCase()}</div>
+                                </div>
+                                <div class="order-items">
+                                    ${order.items.map(item => `<p>• ${item}</p>`).join('')}
+                                </div>
+                                <div class="order-time">
+                                    Ordered: ${order.orderTime}
+                                </div>
+                                <div class="order-total" style="margin-top: 10px; font-weight: bold;">Total: ₹${order.total}</div>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('orderTracking').innerHTML = `
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div class="order-id">Order Not Found</div>
+                                </div>
+                                <div class="order-items">
+                                    <p>We couldn't find order ${currentOrderId}.</p>
+                                    <p>Please check your Order ID or place a new order.</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }, (error) => {
+                    document.getElementById('trackingLoading').style.display = 'none';
+                    document.getElementById('orderTracking').innerHTML = `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div class="order-id">Connection Error</div>
+                            </div>
+                            <div class="order-items">
+                                <p>Unable to load order status.</p>
+                                <p>Please check your connection and try again.</p>
+                            </div>
+                        </div>
+                    `;
+                });
+        }
+
+        function getStatusIcon(status) {
+            const icons = {
+                'waiting': '🔴',
+                'preparing': '🟡', 
+                'ready': '🟢',
+                'completed': '🔵'
+            };
+            return icons[status] || '⚪';
+        }
+
+        // Initialize
+        updateCartDisplay();
+    </script>
+</body>
+</html>
