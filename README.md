@@ -64,3 +64,65 @@
 - **Netlify** — Global CDN hosting and fast static deployment  
 
 ### 🧩 Architecture Flow
+Customer → Menu Selection → Place Order → Firebase (orders)
+↑ ↓
+Admin Dashboard ← Real-time Updates
+
+
+---
+
+## 🎯 Key Features
+
+### 🛒 Customer Experience
+- **Intuitive Menu:** Categorized items with best-seller highlights  
+- **Smart Cart:** Add/remove items with visual feedback  
+- **Live Tracking:** Color-coded statuses (`Waiting → Preparing → Ready → Completed`)  
+- **Order History:** Persistent tracking across sessions  
+
+### 📊 Business Intelligence
+- **Real-time Analytics:** Live sales and revenue tracking  
+- **Best-seller Identification:** Data-driven menu optimization  
+- **Performance Metrics:** Order volume, wait times, throughput  
+- **Inventory Insights:** Demand forecasting for popular items  
+
+### 👨‍💼 Operational Excellence
+- **Kanban Dashboard:** Visual workflow for kitchen and staff  
+- **One-click Updates:** Streamlined status changes  
+- **Team Coordination:** Reduced communication overhead  
+- **Quality Control:** Consistent order fulfillment  
+
+---
+
+## 🏗️ Technical Implementation
+
+### ⚡ Real-time Magic
+```js
+// Firebase real-time listener
+db.collection('orders').onSnapshot((snapshot) => {
+    // Instant updates across all devices
+    updateDashboard();
+});
+
+📱 Mobile-first Design
+
+Touch-optimized: Large, accessible buttons for busy environments
+
+Progressive Web App (PWA): Works offline with cached resources
+
+QR Code Ready: Instant access for customers in queue
+
+🧩 Future Enhancements
+
+🧾 Billing & Payment integration (UPI / QR)
+
+🔔 Push notifications for order readiness
+
+📈 Advanced analytics dashboard with filters
+
+👥 Multi-admin role management
+
+🧑‍💻 Developers
+
+Project Lead: Sharanya
+Technologies: HTML • CSS • JavaScript • Firebase • Netlify
+Version: 1.0.0
